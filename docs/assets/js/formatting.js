@@ -9,6 +9,9 @@ const DATE_TIME_FORMAT = new Intl.DateTimeFormat(LOCALE, {
   minute: '2-digit',
 });
 const TIME_FORMAT = new Intl.DateTimeFormat(LOCALE, { hour: '2-digit', minute: '2-digit' });
+const SHORT_DATE_FORMAT = new Intl.DateTimeFormat(LOCALE, { day: 'numeric', month: 'short' });
+const LAST_HOUR_OF_DAY = 23;
+const MINUTES_THAT_ROUND_UP = 30;
 const NUMBER_FORMAT = new Intl.NumberFormat(LOCALE);
 const TIMESTAMP_PATTERN = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})/;
 const DAY_KEY_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/;
@@ -72,23 +75,37 @@ export function formatCalendarDate(timestamp) {
 }
 
 /**
- * Format the moment a photo was taken.
+ * Format the day and the hour a photo was taken, rounded to the nearest hour.
  * @param {?string} takenAt Camera timestamp.
- * @returns {string} Text such as "Thu 1 Oct, 14:23".
+ * @returns {string} Text such as "Thu 1 Oct, 14:00".
  */
 export function formatDateTime(takenAt) {
   const date = parseTakenAt(takenAt);
-  return date ? DATE_TIME_FORMAT.format(date) : 'Date unknown';
+  return date ? DATE_TIME_FORMAT.format(roundedToHour(date)) : 'Date unknown';
 }
 
 /**
- * Format the time of day a photo was taken.
+ * Format the hour a photo was taken, rounded to the nearest hour.
  * @param {?string} takenAt Camera timestamp.
- * @returns {string} Text such as "14:23", or an empty string.
+ * @returns {string} Text such as "14:00", or an empty string.
  */
 export function formatTime(takenAt) {
   const date = parseTakenAt(takenAt);
-  return date ? TIME_FORMAT.format(date) : '';
+  return date ? TIME_FORMAT.format(roundedToHour(date)) : '';
+}
+
+/**
+ * Format the days between two days in short form.
+ * @param {string} firstDayKey First day.
+ * @param {string} lastDayKey Last day.
+ * @returns {string} Text such as "26 Sept – 3 Oct", or a single day.
+ */
+export function formatShortDateRange(firstDayKey, lastDayKey) {
+  const firstDay = parseDayKey(firstDayKey);
+  const lastDay = parseDayKey(lastDayKey);
+  if (!firstDay || !lastDay) return '';
+  if (firstDayKey === lastDayKey) return SHORT_DATE_FORMAT.format(firstDay);
+  return SHORT_DATE_FORMAT.formatRange(firstDay, lastDay);
 }
 
 /**
@@ -101,15 +118,6 @@ export function formatCoordinates(latitude, longitude) {
   const latitudeText = `${Math.abs(latitude).toFixed(4)}° ${latitude >= 0 ? 'N' : 'S'}`;
   const longitudeText = `${Math.abs(longitude).toFixed(4)}° ${longitude >= 0 ? 'E' : 'W'}`;
   return `${latitudeText}, ${longitudeText}`;
-}
-
-/**
- * Format a distance in whole kilometres.
- * @param {number} kilometres Distance.
- * @returns {string} Text such as "1,284 km".
- */
-export function formatDistance(kilometres) {
-  return `${NUMBER_FORMAT.format(Math.round(kilometres))} km`;
 }
 
 /**
@@ -130,4 +138,9 @@ export function formatNumber(value) {
  */
 export function formatCount(count, singular, plural) {
   return `${NUMBER_FORMAT.format(count)} ${count === 1 ? singular : plural}`;
+}
+
+function roundedToHour(date) {
+  const roundsUp = date.getMinutes() >= MINUTES_THAT_ROUND_UP && date.getHours() < LAST_HOUR_OF_DAY;
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate(), date.getHours() + (roundsUp ? 1 : 0));
 }

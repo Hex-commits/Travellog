@@ -44,7 +44,7 @@ export function groupPhotosByDay(photos) {
 /**
  * Compute the headline figures for the trip.
  * @param {object[]} photos Published photos in chronological order.
- * @returns {{photoCount: number, locatedCount: number, dayCount: number, firstDayKey: ?string, lastDayKey: ?string}} Trip figures.
+ * @returns {{photoCount: number, dayCount: number, firstDayKey: ?string, lastDayKey: ?string}} Trip figures.
  */
 export function summarizeTrip(photos) {
   const dayKeys = photos.map((photo) => dayKeyOf(photo.takenAt)).filter(Boolean).sort();
@@ -52,7 +52,6 @@ export function summarizeTrip(photos) {
   const lastDayKey = dayKeys.at(-1) ?? null;
   return {
     photoCount: photos.length,
-    locatedCount: photos.filter(hasLocation).length,
     dayCount: firstDayKey ? calendarDaysBetween(firstDayKey, lastDayKey) + 1 : 0,
     firstDayKey,
     lastDayKey,

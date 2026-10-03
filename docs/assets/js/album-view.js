@@ -1,46 +1,39 @@
-import { formatCount, formatDateTime, formatDayHeading, formatTime } from './formatting.js';
-import { hasLocation } from './trip-summary.js';
+import { formatCount, formatDateTime } from './formatting.js';
 
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
 /**
- * Show the photos as an album grouped by day.
- * @param {HTMLElement} container Element that receives the album.
- * @param {{dayKey: ?string, dayNumber: ?number, photos: object[]}[]} dayGroups Photos grouped by day.
- * @param {{onOpenPhoto: function(string): void, onPreviewPhoto: function(?string): void}} callbacks Reactions to the album.
- * @returns {{highlight: function(?string, {scroll: boolean, focus: boolean}=): void,
- *   photoInDirection: function(?string, string): ?string}} Album controls.
+ * Show the photos as an album of sections, such as days or places.
+ * @param {HTMLElement} container Element that receives the album and scrolls it to the selected photo.
+ * @param {{onOpenPhoto: function(string): void}} callbacks Reaction to a click on a photo.
+ * @returns {{render: function(object[]): void, highlight: function(?string, {scroll: boolean, focus: boolean,
+ *   instant: boolean}=): void, photoInDirection: function(?string, string): ?string}} Album controls.
  */
-export function createAlbumView(container, dayGroups, { onOpenPhoto, onPreviewPhoto }) {
-  container.replaceChildren(...(dayGroups.length ? dayGroups.map(renderDay) : [renderEmptyState()]));
-  const thumbnails = new Map(
-    [...container.querySelectorAll('[data-photo-id]')].map((element) => [element.dataset.photoId, element]),
-  );
-  const thumbnailFromEvent = (event) => event.target.closest('[data-photo-id]');
-
-  container.addEventListener('click', (event) => {
-    const thumbnail = thumbnailFromEvent(event);
-    if (thumbnail) onOpenPhoto(thumbnail.dataset.photoId);
-  });
-  for (const eventName of ['pointerover', 'focusin']) {
-    container.addEventListener(eventName, (event) => {
-      const thumbnail = thumbnailFromEvent(event);
-      if (thumbnail) onPreviewPhoto(thumbnail.dataset.photoId);
-    });
-  }
-  container.addEventListener('pointerleave', () => onPreviewPhoto(null));
-
+export function createAlbumView(container, { onOpenPhoto }) {
+  let thumbnails = new Map();
   let activeThumbnail = null;
 
-  function highlight(photoId, { scroll = false, focus = false } = {}) {
+  container.addEventListener('click', (event) => {
+    const thumbnail = event.target.closest('[data-photo-id]');
+    if (thumbnail) onOpenPhoto(thumbnail.dataset.photoId);
+  });
+
+  function render(sections) {
+    container.replaceChildren(...(sections.length ? sections.map(renderSection) : [renderEmptyState()]));
+    thumbnails = new Map(
+      [...container.querySelectorAll('[data-photo-id]')].map((element) => [element.dataset.photoId, element]),
+    );
+    activeThumbnail = null;
+    container.scrollTop = 0;
+  }
+
+  function highlight(photoId, { scroll = false, focus = false, instant = false } = {}) {
     activeThumbnail?.classList.remove('is-active');
     activeThumbnail = thumbnails.get(photoId) ?? null;
     if (!activeThumbnail) return;
     activeThumbnail.classList.add('is-active');
     if (focus) activeThumbnail.focus({ preventScroll: true });
-    if (scroll) {
-      activeThumbnail.scrollIntoView({ block: 'nearest', behavior: reducedMotion.matches ? 'auto' : 'smooth' });
-    }
+    if (scroll) centerInView(container, activeThumbnail, instant);
   }
 
   function photoInDirection(photoId, direction) {
@@ -52,7 +45,14 @@ export function createAlbumView(container, dayGroups, { onOpenPhoto, onPreviewPh
     return photoInNeighbouringRow(thumbnails, photoId, direction === 'down');
   }
 
-  return { highlight, photoInDirection };
+  return { render, highlight, photoInDirection };
+}
+
+function centerInView(container, element, instant) {
+  const containerBox = container.getBoundingClientRect();
+  const elementBox = element.getBoundingClientRect();
+  const offset = elementBox.top - containerBox.top - (containerBox.height - elementBox.height) / 2;
+  container.scrollBy({ top: offset, behavior: instant || reducedMotion.matches ? 'auto' : 'smooth' });
 }
 
 function photoInNeighbouringRow(thumbnails, photoId, downwards) {
@@ -70,36 +70,42 @@ function photoInNeighbouringRow(thumbnails, photoId, downwards) {
     .candidateId;
 }
 
-function renderDay(group) {
-  const section = document.createElement('section');
-  section.className = 'day';
-  const headingId = `day-${group.dayKey ?? 'undated'}`;
-  section.setAttribute('aria-labelledby', headingId);
+function renderSection(section, index) {
+  const element = document.createElement('section');
+  element.className = 'album-section';
+  const headingId = `album-section-${index}`;
+  element.setAttribute('aria-labelledby', headingId);
 
   const header = document.createElement('header');
-  header.className = 'day-header';
-  const dayNumber = document.createElement('p');
-  dayNumber.className = 'day-number';
-  dayNumber.textContent = group.dayNumber ? `Day ${group.dayNumber}` : 'Undated';
+  header.className = 'section-header';
+  const eyebrow = document.createElement('p');
+  eyebrow.className = 'section-eyebrow';
+  eyebrow.textContent = section.eyebrow;
   const title = document.createElement('h2');
-  title.className = 'day-title';
+  title.className = 'section-title';
   title.id = headingId;
-  title.textContent = group.dayKey ? formatDayHeading(group.dayKey) : 'Date unknown';
+  title.textContent = section.title;
+  if (section.titleJa) {
+    const japaneseTitle = document.createElement('span');
+    japaneseTitle.lang = 'ja';
+    japaneseTitle.textContent = section.titleJa;
+    title.append(' ', japaneseTitle);
+  }
   const count = document.createElement('p');
-  count.className = 'day-count';
-  count.textContent = formatCount(group.photos.length, 'photo', 'photos');
-  header.append(dayNumber, title, count);
+  count.className = 'section-count';
+  count.textContent = formatCount(section.photos.length, 'photo', 'photos');
+  header.append(eyebrow, title, count);
 
   const grid = document.createElement('ul');
   grid.className = 'thumb-grid';
   grid.setAttribute('role', 'list');
-  grid.append(...group.photos.map(renderThumbnail));
+  grid.append(...section.photos.map((photo) => renderThumbnail(photo, section.caption(photo))));
 
-  section.append(header, grid);
-  return section;
+  element.append(header, grid);
+  return element;
 }
 
-function renderThumbnail(photo) {
+function renderThumbnail(photo, captionText) {
   const item = document.createElement('li');
   const button = document.createElement('button');
   button.type = 'button';
@@ -117,8 +123,7 @@ function renderThumbnail(photo) {
 
   const caption = document.createElement('span');
   caption.className = 'thumb-caption';
-  const time = formatTime(photo.takenAt);
-  caption.textContent = hasLocation(photo) ? time : [time, 'no location'].filter(Boolean).join(' · ');
+  caption.textContent = captionText;
 
   button.append(image, caption);
   item.append(button);

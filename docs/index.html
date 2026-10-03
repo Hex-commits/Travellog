@@ -17,34 +17,33 @@
 <body>
   <div class="page">
     <header class="report-header">
-      <p class="eyebrow"><span>Travel log</span><span lang="ja">旅の記録</span></p>
-      <h1 class="report-title">Japan 2026</h1>
-      <p class="report-dates" id="trip-dates">Loading photos…</p>
-      <dl class="trip-stats">
-        <div><dt>Photos</dt><dd id="stat-photos">–</dd></div>
-        <div><dt>Days</dt><dd id="stat-days">–</dd></div>
-        <div><dt>Distance</dt><dd id="stat-distance">–</dd></div>
-        <div><dt>On the map</dt><dd id="stat-located">–</dd></div>
-      </dl>
+      <div class="report-heading">
+        <p class="eyebrow"><span>Travel log</span><span lang="ja">旅の記録</span></p>
+        <h1 class="report-title">Japan 2026</h1>
+        <p class="report-dates" id="trip-dates">Loading photos…</p>
+      </div>
+      <div class="report-figures">
+        <dl class="trip-stats">
+          <div><dt>Photos</dt><dd id="stat-photos">–</dd></div>
+          <div><dt>Days</dt><dd id="stat-days">–</dd></div>
+        </dl>
+        <p class="report-note" id="updated-at"></p>
+      </div>
     </header>
 
     <main class="explorer">
       <section class="map-panel" aria-label="Map of photo locations">
         <div id="map" class="map"></div>
-        <div class="map-key">
-          <p class="map-key-row"><span class="map-key-sample" aria-hidden="true"><span class="map-key-line map-key-line-cities"></span><svg class="map-key-arrow" viewBox="0 0 14 14" width="12" height="12"><path d="M4.5 2.5 9.5 7l-5 4.5"/></svg></span>Travel between cities</p>
-          <p class="map-key-row"><span class="map-key-sample" aria-hidden="true"><span class="map-key-line"></span><svg class="map-key-arrow" viewBox="0 0 14 14" width="12" height="12"><path d="M4.5 2.5 9.5 7l-5 4.5"/></svg></span>Route between photos</p>
-        </div>
       </section>
       <aside class="album-panel" aria-label="Photo album">
-        <div id="album" class="album"></div>
+        <div class="album-tabs" id="album-tabs" role="tablist" aria-label="Order of the photos">
+          <button class="album-tab" type="button" role="tab" aria-controls="album" aria-selected="true" data-album-order="date">By date</button>
+          <button class="album-tab" type="button" role="tab" aria-controls="album" aria-selected="false" data-album-order="place">By place</button>
+        </div>
+        <div id="album" class="album" role="tabpanel"></div>
       </aside>
     </main>
 
-    <footer class="report-footer">
-      <p id="updated-at"></p>
-      <p>Times are shown as recorded by the camera.</p>
-    </footer>
   </div>
 
   <dialog id="lightbox" class="lightbox" aria-label="Photo viewer">
@@ -56,10 +55,17 @@
     </button>
     <figure class="lightbox-figure" data-lightbox-figure>
       <img data-lightbox-image alt="">
-      <figcaption class="lightbox-caption">
-        <span class="lightbox-date" data-lightbox-date></span>
-        <span class="lightbox-data" data-lightbox-coordinates></span>
-        <span class="lightbox-data" data-lightbox-counter></span>
+      <figcaption class="lightbox-details">
+        <div class="lightbox-map-frame" data-lightbox-map-frame>
+          <div class="lightbox-map" data-lightbox-map></div>
+          <p class="lightbox-map-empty">No location recorded</p>
+        </div>
+        <div class="lightbox-text">
+          <p class="lightbox-date" data-lightbox-date></p>
+          <p class="lightbox-area" data-lightbox-area></p>
+          <p class="lightbox-data"><span data-lightbox-coordinates></span><span data-lightbox-counter></span></p>
+          <button class="lightbox-show-on-map" type="button" data-lightbox-close>Show on map</button>
+        </div>
       </figcaption>
     </figure>
     <button class="lightbox-step lightbox-next" type="button" data-lightbox-step="1" aria-label="Next photo">

@@ -1,13 +1,16 @@
+import { sectionsByDate, sectionsByPlace } from './album-sections.js';
+import { createAlbumTabs } from './album-tabs.js';
 import { createAlbumView } from './album-view.js';
-import { formatCalendarDate, formatDateRange, formatDistance, formatNumber } from './formatting.js';
-import { enableArrowKeySelection } from './keyboard-selection.js';
+import { formatCalendarDate, formatDateRange, formatNumber } from './formatting.js';
 import { createLightbox } from './lightbox.js';
 import { createMapView } from './map-view.js';
-import { groupPhotosByDay, summarizeTrip } from './trip-summary.js';
+import { createPhotoContext } from './photo-context.js';
+import { enableSelectionControls } from './selection-controls.js';
+import { summarizeTrip } from './trip-summary.js';
 
 const MANIFEST_URL = 'data/photos.json';
 const ROUTE_URL = 'data/route.json';
-const EMPTY_ROUTE = { areas: [], connections: [], localPaths: [], distanceKm: null };
+const EMPTY_ROUTE = { areas: [], connections: [], localPaths: [] };
 
 /**
  * Load the list of published photos.
@@ -23,7 +26,7 @@ async function loadManifest() {
 
 /**
  * Load the travel route between the areas the photos were taken in.
- * @returns {Promise<{areas: object[], connections: object[], localPaths: string[][], distanceKm: ?number}>} The route,
+ * @returns {Promise<{areas: object[], connections: object[], localPaths: string[][]}>} The route,
  *   or an empty route when none has been built yet.
  */
 async function loadRoute() {
@@ -40,10 +43,9 @@ async function loadRoute() {
 /**
  * Fill the report header with the trip's figures.
  * @param {ReturnType<typeof summarizeTrip>} summary Trip figures.
- * @param {?number} distanceKm Distance travelled, when known.
  * @param {?string} generatedAt When the photo list was last published.
  */
-function renderSummary(summary, distanceKm, generatedAt) {
+function renderSummary(summary, generatedAt) {
   const setText = (id, text) => {
     document.getElementById(id).textContent = text;
   };
@@ -53,8 +55,6 @@ function renderSummary(summary, distanceKm, generatedAt) {
   );
   setText('stat-photos', formatNumber(summary.photoCount));
   setText('stat-days', formatNumber(summary.dayCount));
-  setText('stat-distance', Number.isFinite(distanceKm) ? formatDistance(distanceKm) : '–');
-  setText('stat-located', `${formatNumber(summary.locatedCount)} of ${formatNumber(summary.photoCount)}`);
   setText('updated-at', generatedAt ? `Updated ${formatCalendarDate(generatedAt)}` : '');
 }
 
@@ -71,43 +71,62 @@ async function start() {
   }
   const route = await routeLoading;
   const { photos } = manifest;
-  renderSummary(summarizeTrip(photos), route.distanceKm, manifest.generatedAt);
+  renderSummary(summarizeTrip(photos), manifest.generatedAt);
 
   let lightbox = null;
   let album = null;
+  let mapView = null;
   let selectedPhotoId = null;
+  const albumElement = document.getElementById('album');
   const lightboxElement = document.getElementById('lightbox');
-  const mapView = createMapView(document.getElementById('map'), photos, route, {
-    onOpenPhoto: (photoId) => lightbox.open(photoId),
-    onSelectPhoto: (photoId) => {
-      selectedPhotoId = photoId;
-      album.highlight(photoId, { scroll: true });
+  const photoContext = createPhotoContext(
+    {
+      frameElement: lightboxElement.querySelector('[data-lightbox-map-frame]'),
+      mapElement: lightboxElement.querySelector('[data-lightbox-map]'),
+      areaElement: lightboxElement.querySelector('[data-lightbox-area]'),
     },
-  });
-  album = createAlbumView(document.getElementById('album'), groupPhotosByDay(photos), {
+    photos,
+    route,
+  );
+
+  const selectPhoto = (photoId, { moveMap = true } = {}) => {
+    selectedPhotoId = photoId;
+    album.highlight(photoId, { scroll: true, focus: true });
+    if (moveMap) mapView.focusPhoto(photoId);
+  };
+
+  mapView = createMapView(document.getElementById('map'), photos, route, {
     onOpenPhoto: (photoId) => lightbox.open(photoId),
-    onPreviewPhoto: (photoId) => mapView.highlight(photoId),
+    onSelectPhoto: (photoId) => selectPhoto(photoId, { moveMap: false }),
+  });
+  album = createAlbumView(albumElement, {
+    onOpenPhoto: (photoId) => lightbox.open(photoId),
+  });
+  const sectionsInOrder = {
+    date: () => sectionsByDate(photos),
+    place: () => sectionsByPlace(photos, route.areas),
+  };
+  createAlbumTabs(document.getElementById('album-tabs'), (order) => {
+    album.render(sectionsInOrder[order]());
+    album.highlight(selectedPhotoId, { scroll: true, instant: true });
   });
   lightbox = createLightbox(lightboxElement, photos, {
     onShowPhoto: (photoId) => {
       selectedPhotoId = photoId;
       album.highlight(photoId);
       mapView.highlight(photoId);
+      photoContext.show(photoId);
     },
-    onClose: (photoId) => {
-      album.highlight(photoId, { scroll: true, focus: true });
-      mapView.focusPhoto(photoId);
-    },
+    onClose: (photoId) => selectPhoto(photoId),
   });
-  enableArrowKeySelection({
-    photoInDirection: album.photoInDirection,
-    selectPhoto: (photoId) => {
-      selectedPhotoId = photoId;
-      album.highlight(photoId, { scroll: true, focus: true });
-      mapView.showPhoto(photoId);
+  enableSelectionControls({
+    move: (direction) => {
+      const targetPhotoId = album.photoInDirection(selectedPhotoId, direction);
+      if (targetPhotoId) selectPhoto(targetPhotoId);
     },
-    selectedPhotoId: () => selectedPhotoId,
-    isPaused: () => lightboxElement.open,
+    isViewerOpen: () => lightboxElement.open,
+    stepViewer: (offset) => lightbox.step(offset),
+    swipeArea: albumElement,
   });
 }
 

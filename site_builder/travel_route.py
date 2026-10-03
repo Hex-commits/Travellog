@@ -7,7 +7,6 @@ from shapely.geometry import LineString, mapping
 from shapely.geometry.base import BaseGeometry
 
 from site_builder.areas import Area
-from site_builder.geo import distance_km
 from site_builder.library import LibraryPhoto
 
 COORDINATE_DECIMALS = 5
@@ -21,8 +20,6 @@ class AreaConnection:
     to_area_id: str
     from_point: tuple[float, float]
     to_point: tuple[float, float]
-    forward_arrival_photo_ids: tuple[str, ...]
-    backward_arrival_photo_ids: tuple[str, ...]
 
 
 @dataclass(frozen=True)
@@ -30,7 +27,6 @@ class TravelRoute:
     areas: list[Area]
     connections: list[AreaConnection]
     local_paths: list[tuple[str, ...]]
-    distance_km: float
 
 
 @dataclass
@@ -47,33 +43,22 @@ def build_travel_route(photos: list[LibraryPhoto], areas: list[Area]) -> TravelR
         areas: Areas with their boundaries and photo ids.
 
     Returns:
-        The areas, their connections with the first photo of every arrival, the local paths and the distance travelled.
+        The areas, their connections and the local paths between photos.
     """
     visits = _group_into_visits(photos, areas)
     local_paths = [visit.photos for visit in visits if len(visit.photos) > 1]
-    connections: dict[frozenset[str], dict] = {}
-    travelled_km = sum(_path_length_km(path) for path in local_paths)
+    connections: dict[frozenset[str], AreaConnection] = {}
     for previous_visit, next_visit in zip(visits, visits[1:]):
-        travelled_km += _path_length_km([previous_visit.photos[-1], next_visit.photos[0]])
         if previous_visit.area and next_visit.area:
-            _record_trip(connections, previous_visit.area, next_visit.area, next_visit.photos[0])
+            pair = frozenset({previous_visit.area.id, next_visit.area.id})
+            if pair not in connections:
+                connections[pair] = _connect(previous_visit.area, next_visit.area)
         else:
             local_paths.append([previous_visit.photos[-1], next_visit.photos[0]])
     return TravelRoute(
         areas=areas,
-        connections=[
-            AreaConnection(
-                from_area_id=connection["from_area_id"],
-                to_area_id=connection["to_area_id"],
-                from_point=connection["from_point"],
-                to_point=connection["to_point"],
-                forward_arrival_photo_ids=tuple(connection["forward"]),
-                backward_arrival_photo_ids=tuple(connection["backward"]),
-            )
-            for connection in connections.values()
-        ],
+        connections=list(connections.values()),
         local_paths=[tuple(photo.id for photo in path) for path in local_paths],
-        distance_km=travelled_km,
     )
 
 
@@ -92,7 +77,7 @@ def write_route(route: TravelRoute, route_path: Path) -> None:
                 "nameJa": area.name_ja,
                 "labelLatitude": round(area.label_point[0], COORDINATE_DECIMALS),
                 "labelLongitude": round(area.label_point[1], COORDINATE_DECIMALS),
-                "photoCount": len(area.photo_ids),
+                "photoIds": list(area.photo_ids),
                 "boundary": _display_boundary(area.boundary),
             }
             for area in route.areas
@@ -103,13 +88,10 @@ def write_route(route: TravelRoute, route_path: Path) -> None:
                 "to": connection.to_area_id,
                 "fromPoint": [round(value, COORDINATE_DECIMALS) for value in connection.from_point],
                 "toPoint": [round(value, COORDINATE_DECIMALS) for value in connection.to_point],
-                "forwardArrivals": list(connection.forward_arrival_photo_ids),
-                "backwardArrivals": list(connection.backward_arrival_photo_ids),
             }
             for connection in route.connections
         ],
         "localPaths": [list(path) for path in route.local_paths],
-        "distanceKm": round(route.distance_km, 1),
     }
     route_path.parent.mkdir(parents=True, exist_ok=True)
     temporary_path = route_path.with_suffix(".tmp")
@@ -131,26 +113,14 @@ def _group_into_visits(photos: list[LibraryPhoto], areas: list[Area]) -> list[_V
     return visits
 
 
-def _record_trip(
-    connections: dict[frozenset[str], dict],
-    from_area: Area,
-    to_area: Area,
-    arrival_photo: LibraryPhoto,
-) -> None:
-    pair = frozenset({from_area.id, to_area.id})
-    if pair not in connections:
-        from_point, to_point = _visible_part_between(from_area, to_area)
-        connections[pair] = {
-            "from_area_id": from_area.id,
-            "to_area_id": to_area.id,
-            "from_point": from_point,
-            "to_point": to_point,
-            "forward": [],
-            "backward": [],
-        }
-    connection = connections[pair]
-    direction = "forward" if connection["from_area_id"] == from_area.id else "backward"
-    connection[direction].append(arrival_photo.id)
+def _connect(from_area: Area, to_area: Area) -> AreaConnection:
+    from_point, to_point = _visible_part_between(from_area, to_area)
+    return AreaConnection(
+        from_area_id=from_area.id,
+        to_area_id=to_area.id,
+        from_point=from_point,
+        to_point=to_point,
+    )
 
 
 def _visible_part_between(from_area: Area, to_area: Area) -> tuple[tuple[float, float], tuple[float, float]]:
@@ -187,12 +157,3 @@ def _rounded_geometry(geometry: dict) -> dict:
         return [round_coordinates(item) for item in value]
 
     return {"type": geometry["type"], "coordinates": round_coordinates(geometry["coordinates"])}
-
-
-def _path_length_km(path: list[LibraryPhoto]) -> float:
-    return sum(
-        distance_km(
-            earlier.metadata.latitude, earlier.metadata.longitude, later.metadata.latitude, later.metadata.longitude
-        )
-        for earlier, later in zip(path, path[1:])
-    )

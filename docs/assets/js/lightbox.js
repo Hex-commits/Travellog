@@ -8,7 +8,7 @@ const SWIPE_THRESHOLD_PX = 50;
  * @param {HTMLDialogElement} dialog Viewer element with image, caption and step buttons.
  * @param {object[]} photos Published photos in chronological order.
  * @param {{onShowPhoto: function(string): void, onClose: function(string): void}} callbacks Reactions to the viewer.
- * @returns {{open: function(string): void}} Viewer controls.
+ * @returns {{open: function(string): void, step: function(number): void}} Viewer controls.
  */
 export function createLightbox(dialog, photos, { onShowPhoto, onClose }) {
   const figure = dialog.querySelector('[data-lightbox-figure]');
@@ -48,8 +48,8 @@ export function createLightbox(dialog, photos, { onShowPhoto, onClose }) {
   function open(photoId) {
     const index = photos.findIndex((photo) => photo.id === photoId);
     if (index < 0) return;
-    show(index);
     if (!dialog.open) dialog.showModal();
+    show(index);
   }
 
   dialog.addEventListener('click', (event) => {
@@ -77,7 +77,7 @@ export function createLightbox(dialog, photos, { onShowPhoto, onClose }) {
     if (currentIndex >= 0) onClose(photos[currentIndex].id);
   });
 
-  return { open };
+  return { open, step };
 }
 
 function preload(photo) {
