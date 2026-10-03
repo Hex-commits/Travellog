@@ -1,0 +1,255 @@
+{
+  "generatedAt": "2026-10-03T23:49:15",
+  "photos": [
+    {
+      "id": "5b6e22cf5184",
+      "takenAt": "2026-09-26T15:12:20",
+      "latitude": 34.41053,
+      "longitude": 132.71641,
+      "width": 2048,
+      "height": 1536,
+      "full": "photos/full/5b6e22cf5184.jpg",
+      "thumb": "photos/thumb/5b6e22cf5184.jpg"
+    },
+    {
+      "id": "d20446f2701d",
+      "takenAt": "2026-09-26T22:59:15",
+      "latitude": 34.41044,
+      "longitude": 132.71643,
+      "width": 1536,
+      "height": 2048,
+      "full": "photos/full/d20446f2701d.jpg",
+      "thumb": "photos/thumb/d20446f2701d.jpg"
+    },
+    {
+      "id": "f608a6b4d982",
+      "takenAt": "2026-09-27T09:56:08",
+      "latitude": 34.39312,
+      "longitude": 132.47192,
+      "width": 1536,
+      "height": 2048,
+      "full": "photos/full/f608a6b4d982.jpg",
+      "thumb": "photos/thumb/f608a6b4d982.jpg"
+    },
+    {
+      "id": "8502fd9b6821",
+      "takenAt": "2026-09-27T10:08:25",
+      "latitude": 34.39337,
+      "longitude": 132.46671,
+      "width": 1536,
+      "height": 2048,
+      "full": "photos/full/8502fd9b6821.jpg",
+      "thumb": "photos/thumb/8502fd9b6821.jpg"
+    },
+    {
+      "id": "e12765198eb3",
+      "takenAt": "2026-09-27T10:28:09",
+      "latitude": 34.39218,
+      "longitude": 132.46052,
+      "width": 1536,
+      "height": 2048,
+      "full": "photos/full/e12765198eb3.jpg",
+      "thumb": "photos/thumb/e12765198eb3.jpg"
+    },
+    {
+      "id": "da05ff30909a",
+      "takenAt": "2026-09-27T10:28:18",
+      "latitude": 34.39218,
+      "longitude": 132.46053,
+      "width": 1536,
+      "height": 2048,
+      "full": "photos/full/da05ff30909a.jpg",
+      "thumb": "photos/thumb/da05ff30909a.jpg"
+    },
+    {
+      "id": "df34fe417b14",
+      "takenAt": "2026-09-27T10:28:33",
+      "latitude": 34.39217,
+      "longitude": 132.46049,
+      "width": 2048,
+      "height": 1536,
+      "full": "photos/full/df34fe417b14.jpg",
+      "thumb": "photos/thumb/df34fe417b14.jpg"
+    },
+    {
+      "id": "68a55c5f7e94",
+      "takenAt": "2026-09-27T12:46:45",
+      "latitude": 34.39496,
+      "longitude": 132.45378,
+      "width": 1536,
+      "height": 2048,
+      "full": "photos/full/68a55c5f7e94.jpg",
+      "thumb": "photos/thumb/68a55c5f7e94.jpg"
+    },
+    {
+      "id": "6a7e4687f1c8",
+      "takenAt": "2026-09-27T13:19:00",
+      "latitude": 34.39709,
+      "longitude": 132.44957,
+      "width": 2048,
+      "height": 1536,
+      "full": "photos/full/6a7e4687f1c8.jpg",
+      "thumb": "photos/thumb/6a7e4687f1c8.jpg"
+    },
+    {
+      "id": "1e82c3ad4b20",
+      "takenAt": "2026-09-27T13:44:02",
+      "latitude": 34.39925,
+      "longitude": 132.46009,
+      "width": 2048,
+      "height": 1536,
+      "full": "photos/full/1e82c3ad4b20.jpg",
+      "thumb": "photos/thumb/1e82c3ad4b20.jpg"
+    },
+    {
+      "id": "f3492989706d",
+      "takenAt": "2026-09-28T09:07:39",
+      "latitude": 34.40665,
+      "longitude": 132.72373,
+      "width": 1536,
+      "height": 2048,
+      "full": "photos/full/f3492989706d.jpg",
+      "thumb": "photos/thumb/f3492989706d.jpg"
+    },
+    {
+      "id": "e37e86199498",
+      "takenAt": "2026-09-28T14:49:12",
+      "latitude": 34.4107,
+      "longitude": 132.71642,
+      "width": 2048,
+      "height": 785,
+      "full": "photos/full/e37e86199498.jpg",
+      "thumb": "photos/thumb/e37e86199498.jpg"
+    },
+    {
+      "id": "20087165cde7",
+      "takenAt": "2026-09-29T17:06:38",
+      "latitude": 34.41048,
+      "longitude": 132.71563,
+      "width": 2048,
+      "height": 1536,
+      "full": "photos/full/20087165cde7.jpg",
+      "thumb": "photos/thumb/20087165cde7.jpg"
+    },
+    {
+      "id": "347a2c5188bf",
+      "takenAt": "2026-09-29T18:29:09",
+      "latitude": 34.411,
+      "longitude": 132.7163,
+      "width": 2048,
+      "height": 1536,
+      "full": "photos/full/347a2c5188bf.jpg",
+      "thumb": "photos/thumb/347a2c5188bf.jpg"
+    },
+    {
+      "id": "c300611e446b",
+      "takenAt": "2026-10-03T10:44:27",
+      "latitude": 34.37301,
+      "longitude": 132.40581,
+      "width": 2048,
+      "height": 1536,
+      "full": "photos/full/c300611e446b.jpg",
+      "thumb": "photos/thumb/c300611e446b.jpg"
+    },
+    {
+      "id": "c87a5a34c01c",
+      "takenAt": "2026-10-03T10:47:47",
+      "latitude": 34.37301,
+      "longitude": 132.40581,
+      "width": 1536,
+      "height": 2048,
+      "full": "photos/full/c87a5a34c01c.jpg",
+      "thumb": "photos/thumb/c87a5a34c01c.jpg"
+    },
+    {
+      "id": "8cabace86b89",
+      "takenAt": "2026-10-03T11:59:55",
+      "latitude": 34.37768,
+      "longitude": 132.43141,
+      "width": 2048,
+      "height": 1536,
+      "full": "photos/full/8cabace86b89.jpg",
+      "thumb": "photos/thumb/8cabace86b89.jpg"
+    },
+    {
+      "id": "db2ae75bf839",
+      "takenAt": "2026-10-03T12:00:09",
+      "latitude": 34.37763,
+      "longitude": 132.4314,
+      "width": 2048,
+      "height": 1536,
+      "full": "photos/full/db2ae75bf839.jpg",
+      "thumb": "photos/thumb/db2ae75bf839.jpg"
+    },
+    {
+      "id": "e87256236200",
+      "takenAt": "2026-10-03T12:04:50",
+      "latitude": 34.37946,
+      "longitude": 132.43285,
+      "width": 1536,
+      "height": 2048,
+      "full": "photos/full/e87256236200.jpg",
+      "thumb": "photos/thumb/e87256236200.jpg"
+    },
+    {
+      "id": "98ee48f4cefe",
+      "takenAt": "2026-10-03T14:50:27",
+      "latitude": 34.39248,
+      "longitude": 132.45776,
+      "width": 2048,
+      "height": 1536,
+      "full": "photos/full/98ee48f4cefe.jpg",
+      "thumb": "photos/thumb/98ee48f4cefe.jpg"
+    },
+    {
+      "id": "76fab455ddaa",
+      "takenAt": "2026-10-03T15:23:34",
+      "latitude": 34.39036,
+      "longitude": 132.46384,
+      "width": 1536,
+      "height": 2048,
+      "full": "photos/full/76fab455ddaa.jpg",
+      "thumb": "photos/thumb/76fab455ddaa.jpg"
+    },
+    {
+      "id": "b518e6c212a6",
+      "takenAt": "2026-10-03T16:42:22",
+      "latitude": 34.39713,
+      "longitude": 132.46736,
+      "width": 1536,
+      "height": 2048,
+      "full": "photos/full/b518e6c212a6.jpg",
+      "thumb": "photos/thumb/b518e6c212a6.jpg"
+    },
+    {
+      "id": "34cb5a8582dc",
+      "takenAt": "2026-10-03T17:27:37",
+      "latitude": 34.39657,
+      "longitude": 132.47127,
+      "width": 2048,
+      "height": 1536,
+      "full": "photos/full/34cb5a8582dc.jpg",
+      "thumb": "photos/thumb/34cb5a8582dc.jpg"
+    },
+    {
+      "id": "2d18236be37f",
+      "takenAt": "2026-10-03T17:37:41",
+      "latitude": 34.39698,
+      "longitude": 132.47216,
+      "width": 1536,
+      "height": 2048,
+      "full": "photos/full/2d18236be37f.jpg",
+      "thumb": "photos/thumb/2d18236be37f.jpg"
+    },
+    {
+      "id": "360d67b6c3b5",
+      "takenAt": "2026-10-03T17:37:53",
+      "latitude": 34.39699,
+      "longitude": 132.47215,
+      "width": 2048,
+      "height": 1536,
+      "full": "photos/full/360d67b6c3b5.jpg",
+      "thumb": "photos/thumb/360d67b6c3b5.jpg"
+    }
+  ]
+}
