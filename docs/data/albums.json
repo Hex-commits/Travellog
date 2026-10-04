@@ -1,0 +1,11 @@
+{
+  "albums": [
+    {
+      "slug": "japan",
+      "name": "Japan",
+      "photoCount": 25,
+      "firstDay": "2026-09-26",
+      "lastDay": "2026-10-03"
+    }
+  ]
+}

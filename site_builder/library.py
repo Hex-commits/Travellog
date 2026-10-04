@@ -22,6 +22,7 @@ logger = logging.getLogger(__name__)
 @dataclass(frozen=True)
 class LibraryPhoto:
     id: str
+    album: str
     source_path: Path
     relative_path: str
     metadata: PhotoMetadata
@@ -38,23 +39,28 @@ class _SourceFile:
 
 
 def scan(settings: Settings) -> list[LibraryPhoto]:
-    """Find every photo in every folder below the raw folder, with when and where it was taken.
+    """Find every photo in the album folders of the raw folder, with when and where it was taken.
 
     Args:
         settings: Folder locations and timezone.
 
     Returns:
-        Photos without duplicates, oldest first.
+        Photos without duplicates inside an album, oldest first.
     """
     settings.raw_dir.mkdir(parents=True, exist_ok=True)
     sources = list(_find_source_files(settings.raw_dir))
     _log_folder_counts(sources)
     cached_entries = _load_cache(settings.library_cache_path)
     current_entries = {}
-    photos_by_id: dict[str, LibraryPhoto] = {}
+    photos_by_album_and_id: dict[tuple[str, str], LibraryPhoto] = {}
+    loose_files = []
     for source in sources:
+        album = _album_of(source)
+        if album is None:
+            loose_files.append(source.relative_path)
+            continue
         photo_id = _photo_id(source)
-        if photo_id in photos_by_id:
+        if (album, photo_id) in photos_by_album_and_id:
             continue
         metadata = _metadata_from_cache(cached_entries.get(source.relative_path), source)
         if metadata is None:
@@ -64,14 +70,21 @@ def scan(settings: Settings) -> list[LibraryPhoto]:
                 logger.warning("Skipped %s: %s", source.relative_path, error)
                 continue
         current_entries[source.relative_path] = _cache_entry(source, metadata)
-        photos_by_id[photo_id] = LibraryPhoto(
+        photos_by_album_and_id[(album, photo_id)] = LibraryPhoto(
             id=photo_id,
+            album=album,
             source_path=source.path,
             relative_path=source.relative_path,
             metadata=metadata,
         )
     _save_cache(settings.library_cache_path, current_entries)
-    return sorted(photos_by_id.values(), key=_chronological_order)
+    if loose_files:
+        logger.warning(
+            "Skipped %d %s lying directly in the raw folder; put them in an album folder.",
+            len(loose_files),
+            "photo" if len(loose_files) == 1 else "photos",
+        )
+    return sorted(photos_by_album_and_id.values(), key=_chronological_order)
 
 
 def _find_source_files(raw_dir: Path) -> Iterator[_SourceFile]:
@@ -112,6 +125,11 @@ def _log_folder_counts(sources: list[_SourceFile]) -> None:
     for folder, photo_count in sorted(photos_per_folder.items()):
         folder_label = "raw" if folder == "." else f"raw/{folder}"
         logger.info("  %s: %d %s", folder_label, photo_count, "photo" if photo_count == 1 else "photos")
+
+
+def _album_of(source: _SourceFile) -> str | None:
+    folder_names = Path(source.relative_path).parts[:-1]
+    return folder_names[0] if folder_names else None
 
 
 def _photo_id(source: _SourceFile) -> str:

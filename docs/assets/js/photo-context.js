@@ -1,32 +1,38 @@
+import { createActiveDot } from './active-dot.js';
 import { addBaseTiles } from './map-tiles.js';
-import { drawAreaOutlines, drawRouteLines } from './route-layers.js';
+import { drawAreaOutlines } from './area-layers.js';
+import { createLastLeg } from './last-leg.js';
 import { hasLocation } from './trip-summary.js';
 
 const CONTEXT_ZOOM = 13;
 const PHOTO_DOT_RADIUS = 4;
 const CURRENT_PHOTO_RADIUS = 7;
+const ACTIVE_DOT_SIZE_PX = 12;
 
 /**
- * Show where the photo in the viewer was taken on a small map with the travel route, and name its area.
+ * Show where the photo in the viewer was taken on a small map with the line leading to it, and name its area.
  * @param {{frameElement: HTMLElement, mapElement: HTMLElement, areaElement: HTMLElement}} elements The map's frame,
  *   the map container inside it and the line that names the area.
  * @param {object[]} photos Published photos in chronological order.
- * @param {{areas: object[], connections: object[], localPaths: string[][]}} route Travel route from route.json.
+ * @param {object[]} areas Areas from areas.json with the ids of their photos.
  * @returns {{show: function(string): void}} Context controls.
  */
-export function createPhotoContext({ frameElement, mapElement, areaElement }, photos, route) {
+export function createPhotoContext({ frameElement, mapElement, areaElement }, photos, areas) {
   const photosById = new Map(photos.map((photo) => [photo.id, photo]));
-  const areaOfPhoto = new Map(route.areas.flatMap((area) => (area.photoIds ?? []).map((photoId) => [photoId, area])));
+  const areaOfPhoto = new Map(areas.flatMap((area) => (area.photoIds ?? []).map((photoId) => [photoId, area])));
   const dots = new Map();
   let map = null;
+  let lastLeg = null;
+  let activeDot = null;
   let currentDot = null;
 
   function createMap() {
     map = L.map(mapElement, { zoomControl: false, keyboard: false, zoomSnap: 0.5 });
     map.attributionControl.setPrefix(false);
     addBaseTiles(map);
-    drawAreaOutlines(map, route.areas);
-    drawRouteLines(map, route, photosById);
+    drawAreaOutlines(map, areas);
+    lastLeg = createLastLeg(map, photos, areas);
+    activeDot = createActiveDot(map, { sizePx: ACTIVE_DOT_SIZE_PX });
     for (const photo of photos.filter(hasLocation)) {
       const dot = L.circleMarker([photo.latitude, photo.longitude], {
         radius: PHOTO_DOT_RADIUS,
@@ -40,11 +46,13 @@ export function createPhotoContext({ frameElement, mapElement, areaElement }, ph
   }
 
   function markCurrent(photoId) {
+    lastLeg.show(photoId);
     if (currentDot) {
       currentDot.setRadius(PHOTO_DOT_RADIUS);
       currentDot.getElement()?.classList.remove('is-active');
     }
     currentDot = dots.get(photoId) ?? null;
+    activeDot.moveTo(currentDot?.getLatLng() ?? null);
     if (!currentDot) return;
     currentDot.setRadius(CURRENT_PHOTO_RADIUS).bringToFront();
     currentDot.getElement()?.classList.add('is-active');

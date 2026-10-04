@@ -1,4 +1,5 @@
 import { sectionsByDate, sectionsByPlace } from './album-sections.js';
+import { createAlbumSwitcher } from './album-switcher.js';
 import { createAlbumTabs } from './album-tabs.js';
 import { createAlbumView } from './album-view.js';
 import { formatCalendarDate, formatDateRange, formatNumber } from './formatting.js';
@@ -8,35 +9,67 @@ import { createPhotoContext } from './photo-context.js';
 import { enableSelectionControls } from './selection-controls.js';
 import { summarizeTrip } from './trip-summary.js';
 
-const MANIFEST_URL = 'data/photos.json';
-const ROUTE_URL = 'data/route.json';
-const EMPTY_ROUTE = { areas: [], connections: [], localPaths: [] };
+const ALBUM_INDEX_URL = 'data/albums.json';
+const ALBUM_ADDRESS_PARAMETER = 'album';
 
 /**
- * Load the list of published photos.
- * @returns {Promise<{generatedAt: ?string, photos: object[]}>} The published photo list.
- * @throws {Error} When the list cannot be downloaded.
+ * Load the list of albums on the site.
+ * @returns {Promise<object[]>} Albums, most recent first, or none when the site has not been built yet.
  */
-async function loadManifest() {
-  const response = await fetch(MANIFEST_URL, { cache: 'no-cache' });
-  if (!response.ok) throw new Error(`Could not load ${MANIFEST_URL} (HTTP ${response.status})`);
-  const manifest = await response.json();
-  return { generatedAt: manifest.generatedAt ?? null, photos: Array.isArray(manifest.photos) ? manifest.photos : [] };
+async function loadAlbumIndex() {
+  try {
+    const response = await fetch(ALBUM_INDEX_URL, { cache: 'no-cache' });
+    if (!response.ok) return [];
+    const { albums } = await response.json();
+    return Array.isArray(albums) ? albums : [];
+  } catch (error) {
+    console.error(error);
+    return [];
+  }
 }
 
 /**
- * Load the travel route between the areas the photos were taken in.
- * @returns {Promise<{areas: object[], connections: object[], localPaths: string[][]}>} The route,
- *   or an empty route when none has been built yet.
+ * Pick the album named in the page address, or the most recent album.
+ * @param {object[]} albums Albums, most recent first.
+ * @returns {?object} The album to show.
  */
-async function loadRoute() {
+function chooseAlbum(albums) {
+  const requestedSlug = new URLSearchParams(window.location.search).get(ALBUM_ADDRESS_PARAMETER);
+  return albums.find((album) => album.slug === requestedSlug) ?? albums[0] ?? null;
+}
+
+/**
+ * Load an album's published photos, with their image addresses made relative to this page.
+ * @param {string} albumFolder Address of the album's folder, ending in a slash.
+ * @returns {Promise<{generatedAt: ?string, photos: object[]}>} The album's photo list.
+ * @throws {Error} When the list cannot be downloaded.
+ */
+async function loadManifest(albumFolder) {
+  const manifestUrl = `${albumFolder}data/photos.json`;
+  const response = await fetch(manifestUrl, { cache: 'no-cache' });
+  if (!response.ok) throw new Error(`Could not load ${manifestUrl} (HTTP ${response.status})`);
+  const manifest = await response.json();
+  const photos = Array.isArray(manifest.photos) ? manifest.photos : [];
+  return {
+    generatedAt: manifest.generatedAt ?? null,
+    photos: photos.map((photo) => ({ ...photo, full: albumFolder + photo.full, thumb: albumFolder + photo.thumb })),
+  };
+}
+
+/**
+ * Load the areas an album's photos were taken in.
+ * @param {string} albumFolder Address of the album's folder, ending in a slash.
+ * @returns {Promise<object[]>} The areas, or none when they have not been built yet.
+ */
+async function loadAreas(albumFolder) {
   try {
-    const response = await fetch(ROUTE_URL, { cache: 'no-cache' });
-    if (!response.ok) return EMPTY_ROUTE;
-    return { ...EMPTY_ROUTE, ...(await response.json()) };
+    const response = await fetch(`${albumFolder}data/areas.json`, { cache: 'no-cache' });
+    if (!response.ok) return [];
+    const { areas } = await response.json();
+    return Array.isArray(areas) ? areas : [];
   } catch (error) {
     console.error(error);
-    return EMPTY_ROUTE;
+    return [];
   }
 }
 
@@ -59,22 +92,31 @@ function renderSummary(summary, generatedAt) {
 }
 
 /**
- * Load the photos and route, then connect the summary, map, album and photo viewer.
+ * Load the chosen album's photos and areas, then connect the summary, map, album and photo viewer.
  */
 async function start() {
+  const albums = await loadAlbumIndex();
+  const currentAlbum = chooseAlbum(albums);
+  createAlbumSwitcher(document.getElementById('album-switcher'), albums, currentAlbum);
+  if (currentAlbum) document.title = currentAlbum.name;
+
   let manifest = { generatedAt: null, photos: [] };
-  const routeLoading = loadRoute();
-  try {
-    manifest = await loadManifest();
-  } catch (error) {
-    console.error(error);
+  let areas = [];
+  if (currentAlbum) {
+    const albumFolder = `albums/${encodeURIComponent(currentAlbum.slug)}/`;
+    const areasLoading = loadAreas(albumFolder);
+    try {
+      manifest = await loadManifest(albumFolder);
+    } catch (error) {
+      console.error(error);
+    }
+    areas = await areasLoading;
   }
-  const route = await routeLoading;
   const { photos } = manifest;
   renderSummary(summarizeTrip(photos), manifest.generatedAt);
 
   let lightbox = null;
-  let album = null;
+  let albumView = null;
   let mapView = null;
   let selectedPhotoId = null;
   const albumElement = document.getElementById('album');
@@ -86,34 +128,34 @@ async function start() {
       areaElement: lightboxElement.querySelector('[data-lightbox-area]'),
     },
     photos,
-    route,
+    areas,
   );
 
   const selectPhoto = (photoId, { moveMap = true } = {}) => {
     selectedPhotoId = photoId;
-    album.highlight(photoId, { scroll: true, focus: true });
+    albumView.highlight(photoId, { scroll: true, focus: true });
     if (moveMap) mapView.focusPhoto(photoId);
   };
 
-  mapView = createMapView(document.getElementById('map'), photos, route, {
+  mapView = createMapView(document.getElementById('map'), photos, areas, {
     onOpenPhoto: (photoId) => lightbox.open(photoId),
     onSelectPhoto: (photoId) => selectPhoto(photoId, { moveMap: false }),
   });
-  album = createAlbumView(albumElement, {
+  albumView = createAlbumView(albumElement, {
     onOpenPhoto: (photoId) => lightbox.open(photoId),
   });
   const sectionsInOrder = {
     date: () => sectionsByDate(photos),
-    place: () => sectionsByPlace(photos, route.areas),
+    place: () => sectionsByPlace(photos, areas),
   };
   createAlbumTabs(document.getElementById('album-tabs'), (order) => {
-    album.render(sectionsInOrder[order]());
-    album.highlight(selectedPhotoId, { scroll: true, instant: true });
+    albumView.render(sectionsInOrder[order]());
+    albumView.highlight(selectedPhotoId, { scroll: true, instant: true });
   });
   lightbox = createLightbox(lightboxElement, photos, {
     onShowPhoto: (photoId) => {
       selectedPhotoId = photoId;
-      album.highlight(photoId);
+      albumView.highlight(photoId);
       mapView.highlight(photoId);
       photoContext.show(photoId);
     },
@@ -121,7 +163,7 @@ async function start() {
   });
   enableSelectionControls({
     move: (direction) => {
-      const targetPhotoId = album.photoInDirection(selectedPhotoId, direction);
+      const targetPhotoId = albumView.photoInDirection(selectedPhotoId, direction);
       if (targetPhotoId) selectPhoto(targetPhotoId);
     },
     isViewerOpen: () => lightboxElement.open,

@@ -10,6 +10,7 @@ const DATE_TIME_FORMAT = new Intl.DateTimeFormat(LOCALE, {
 });
 const TIME_FORMAT = new Intl.DateTimeFormat(LOCALE, { hour: '2-digit', minute: '2-digit' });
 const SHORT_DATE_FORMAT = new Intl.DateTimeFormat(LOCALE, { day: 'numeric', month: 'short' });
+const SHORT_DATE_WITH_YEAR_FORMAT = new Intl.DateTimeFormat(LOCALE, { day: 'numeric', month: 'short', year: 'numeric' });
 const LAST_HOUR_OF_DAY = 23;
 const MINUTES_THAT_ROUND_UP = 30;
 const NUMBER_FORMAT = new Intl.NumberFormat(LOCALE);
@@ -92,6 +93,20 @@ export function formatDateTime(takenAt) {
 export function formatTime(takenAt) {
   const date = parseTakenAt(takenAt);
   return date ? TIME_FORMAT.format(roundedToHour(date)) : '';
+}
+
+/**
+ * Format the days between two days in short form, including the year.
+ * @param {?string} firstDayKey First day.
+ * @param {?string} lastDayKey Last day.
+ * @returns {string} Text such as "26 Sept – 3 Oct 2026", or an empty string.
+ */
+export function formatShortDateRangeWithYear(firstDayKey, lastDayKey) {
+  const firstDay = parseDayKey(firstDayKey);
+  const lastDay = parseDayKey(lastDayKey);
+  if (!firstDay || !lastDay) return '';
+  if (firstDayKey === lastDayKey) return SHORT_DATE_WITH_YEAR_FORMAT.format(firstDay);
+  return SHORT_DATE_WITH_YEAR_FORMAT.formatRange(firstDay, lastDay);
 }
 
 /**

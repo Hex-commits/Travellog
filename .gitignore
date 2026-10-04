@@ -1,4 +1,5 @@
-raw/
+raw/*
+!raw/.gitkeep
 takeout-*.zip
 .cache/
 .venv/

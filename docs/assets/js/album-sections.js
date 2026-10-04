@@ -23,7 +23,7 @@ export function sectionsByDate(photos) {
 /**
  * Split the photos into one album section per area, in the order the areas were first visited.
  * @param {object[]} photos Published photos in chronological order.
- * @param {object[]} areas Areas from route.json with the ids of their photos.
+ * @param {object[]} areas Areas from areas.json with the ids of their photos.
  * @returns {{eyebrow: string, title: string, titleJa: ?string, photos: object[], caption: function(object): string}[]}
  *   Sections for the areas, followed by photos outside every area and photos without a location.
  */

@@ -9,10 +9,11 @@ const WHEEL_LINE_HEIGHT_PX = 16;
 const WHEEL_PAUSE_THAT_RESETS_MS = 250;
 const SHORTEST_TIME_BETWEEN_WHEEL_STEPS_MS = 160;
 const SHORTEST_SWIPE_PX = 24;
-const SWIPE_DISTANCE_PER_STEP_PX = 70;
+const SWIPE_DISTANCE_PER_STEP_PX = 50;
 
 /**
- * Move the photo selection with the arrow keys, the mouse wheel and vertical swipes instead of scrolling the page.
+ * Move the photo selection instead of scrolling the page: the arrow keys move to the photo beside, above or below,
+ * while the mouse wheel and vertical swipes step to the next or previous photo.
  * @param {{move: function(string): void, isViewerOpen: function(): boolean, stepViewer: function(number): void,
  *   swipeArea: HTMLElement}} controls Moves the selection up, down, to the next or previous photo; tells whether the
  *   photo viewer is open; steps the viewer; and names the element that reacts to swipes.
@@ -55,7 +56,7 @@ function followWheel(move, isViewerOpen, stepViewer) {
       if (isViewerOpen()) {
         stepViewer(downwards ? 1 : -1);
       } else {
-        move(downwards ? 'down' : 'up');
+        move(downwards ? 'next' : 'previous');
       }
     },
     { passive: false },
@@ -79,7 +80,7 @@ function followSwipes(move, swipeArea) {
     if (Math.abs(swipedUpBy) < SHORTEST_SWIPE_PX) return;
     ignoreNextClick = true;
     const steps = Math.max(1, Math.round(Math.abs(swipedUpBy) / SWIPE_DISTANCE_PER_STEP_PX));
-    for (let step = 0; step < steps; step += 1) move(swipedUpBy > 0 ? 'down' : 'up');
+    for (let step = 0; step < steps; step += 1) move(swipedUpBy > 0 ? 'next' : 'previous');
   });
   swipeArea.addEventListener(
     'click',

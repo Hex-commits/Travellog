@@ -8,8 +8,9 @@
   --indigo: #2c4a94;
   --indigo-wash: #e4e9f5;
   --marker-ring: #ffffff;
-  --route: rgb(44 74 148 / 0.75);
   --connection: rgb(44 74 148 / 0.7);
+  --here: #e8672a;
+  --here-glow: rgb(232 103 42 / 0.45);
   --area-fill: rgb(44 74 148 / 0.06);
   --area-outline: rgb(44 74 148 / 0.3);
   --shade: rgb(22 26 36 / 0.14);
@@ -43,8 +44,9 @@
     --indigo: #95abee;
     --indigo-wash: #1c2540;
     --marker-ring: #0e1118;
-    --route: rgb(149 171 238 / 0.75);
     --connection: rgb(149 171 238 / 0.75);
+    --here: #ff8f4a;
+    --here-glow: rgb(255 143 74 / 0.45);
     --area-fill: rgb(149 171 238 / 0.07);
     --area-outline: rgb(149 171 238 / 0.32);
     --shade: rgb(0 0 0 / 0.45);
@@ -86,6 +88,10 @@ img {
 button {
   font: inherit;
   color: inherit;
+}
+
+[hidden] {
+  display: none !important;
 }
 
 :focus-visible {
@@ -140,11 +146,6 @@ button {
   text-transform: uppercase;
 }
 
-.eyebrow [lang="ja"] {
-  font-family: var(--font-display);
-  letter-spacing: 0.32em;
-}
-
 .report-title {
   margin: 0;
   font-family: var(--font-display);
@@ -153,6 +154,104 @@ button {
   line-height: 1.08;
   letter-spacing: -0.01em;
   text-wrap: balance;
+}
+
+.album-switcher {
+  position: relative;
+  justify-self: start;
+  max-width: 100%;
+}
+
+.album-switcher-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2em;
+  max-width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.album-switcher-button:disabled {
+  cursor: default;
+}
+
+.album-switcher-chevron {
+  flex: none;
+  width: 0.42em;
+  height: 0.42em;
+  margin-top: 0.08em;
+  color: var(--ink-faint);
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.album-switcher-button:hover:not(:disabled) .album-switcher-chevron {
+  color: var(--indigo);
+}
+
+.album-switcher-button[aria-expanded="true"] .album-switcher-chevron {
+  transform: rotate(180deg);
+}
+
+.album-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 10;
+  display: grid;
+  gap: 2px;
+  min-width: 280px;
+  max-width: min(420px, calc(100vw - 32px));
+  margin: 0;
+  padding: 6px;
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  background: var(--surface);
+  box-shadow: 0 16px 40px var(--shade);
+  list-style: none;
+}
+
+.album-option {
+  display: grid;
+  gap: 1px;
+  padding: 9px 12px;
+  border-radius: 6px;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.album-option:hover,
+.album-option:focus-visible {
+  background: var(--indigo-wash);
+}
+
+.album-option-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.album-option[aria-current="page"] .album-option-name::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--here);
+}
+
+.album-option-details {
+  color: var(--ink-faint);
+  font-family: var(--font-data);
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
 }
 
 .report-dates {
@@ -359,7 +458,7 @@ button {
 }
 
 .thumb.is-active {
-  outline: 2px solid var(--indigo);
+  outline: 2px solid var(--here);
   outline-offset: 2px;
 }
 
@@ -435,19 +534,16 @@ button {
   color: var(--ink-soft);
 }
 
-.photo-route {
+.last-leg {
   fill: none;
-  stroke: var(--route);
-  stroke-width: 2;
-  stroke-dasharray: 2 6;
+  stroke: var(--connection);
+  stroke-width: 2.5;
   stroke-linecap: round;
 }
 
-.area-connection {
-  fill: none;
-  stroke: var(--connection);
+.last-leg.is-travel {
   stroke-width: 3;
-  stroke-linecap: round;
+  stroke-dasharray: 1 8;
 }
 
 .area-boundary {
@@ -490,8 +586,38 @@ button {
 }
 
 .photo-marker.is-active {
-  stroke-width: 3;
-  filter: drop-shadow(0 0 6px var(--indigo));
+  opacity: 0;
+}
+
+.active-dot::before,
+.active-dot::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+}
+
+.active-dot::before {
+  z-index: 1;
+  background: var(--here);
+  box-shadow: 0 0 0 2.5px var(--marker-ring), 0 1px 6px var(--shade);
+}
+
+.active-dot::after {
+  background: var(--here-glow);
+  animation: active-dot-pulse 1.8s ease-out infinite;
+}
+
+@keyframes active-dot-pulse {
+  from {
+    opacity: 0.9;
+    transform: scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: scale(3.4);
+  }
 }
 
 .photo-popup .leaflet-popup-content-wrapper {

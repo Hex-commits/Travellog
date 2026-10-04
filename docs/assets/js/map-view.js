@@ -1,6 +1,8 @@
 import { formatCoordinates, formatDateTime } from './formatting.js';
 import { addBaseTiles } from './map-tiles.js';
-import { areaLabelPoint, drawTravelRoute } from './route-layers.js';
+import { createActiveDot } from './active-dot.js';
+import { areaLabelPoint, drawAreas } from './area-layers.js';
+import { createLastLeg } from './last-leg.js';
 import { hasLocation } from './trip-summary.js';
 
 const JAPAN_CENTER = [36.2, 138.25];
@@ -18,22 +20,24 @@ const FIT_PADDING_BOTTOM_RIGHT_FOR_LABELS = [170, 48];
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
 /**
- * Show the photos as markers on a map together with the travel route between the areas they were taken in.
+ * Show the photos as markers on a map with the areas they were taken in and the line leading to the marked photo.
  * @param {HTMLElement} container Element that receives the map.
  * @param {object[]} photos Published photos in chronological order.
- * @param {{areas: object[], connections: object[], localPaths: string[][]}} route Travel route from route.json.
+ * @param {object[]} areas Areas from areas.json.
  * @param {{onOpenPhoto: function(string): void, onSelectPhoto: function(string): void}} callbacks Reactions to the map.
  * @returns {{highlight: function(?string): void, focusPhoto: function(string): void}} Map controls: mark a photo, or
  *   move the map to a photo, mark it and open its preview.
  */
-export function createMapView(container, photos, route, { onOpenPhoto, onSelectPhoto }) {
+export function createMapView(container, photos, areas, { onOpenPhoto, onSelectPhoto }) {
   const map = L.map(container, { zoomSnap: 0.5 });
   addBaseTiles(map);
   const locatedPhotos = photos.filter(hasLocation);
   let activeMarker = null;
 
-  showEverything(map, [...locatedPhotos.map(toLatLng), ...route.areas.map(areaLabelPoint)]);
-  drawTravelRoute(map, route, new Map(photos.map((photo) => [photo.id, photo])));
+  showEverything(map, [...locatedPhotos.map(toLatLng), ...areas.map(areaLabelPoint)]);
+  drawAreas(map, areas);
+  const lastLeg = createLastLeg(map, photos, areas);
+  const activeDot = createActiveDot(map);
   const markers = new Map(locatedPhotos.map((photo) => [photo.id, createMarker(photo, onOpenPhoto).addTo(map)]));
 
   for (const [photoId, marker] of markers) {
@@ -44,11 +48,13 @@ export function createMapView(container, photos, route, { onOpenPhoto, onSelectP
   }
 
   function highlight(photoId) {
+    lastLeg.show(photoId);
     if (activeMarker) {
       activeMarker.setRadius(MARKER_RADIUS);
       activeMarker.getElement()?.classList.remove('is-active');
     }
     activeMarker = markers.get(photoId) ?? null;
+    activeDot.moveTo(activeMarker?.getLatLng() ?? null);
     if (!activeMarker) return;
     activeMarker.setRadius(ACTIVE_MARKER_RADIUS).bringToFront();
     activeMarker.getElement()?.classList.add('is-active');
