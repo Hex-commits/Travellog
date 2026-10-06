@@ -8,20 +8,15 @@ const WHEEL_DISTANCE_PER_STEP = 60;
 const WHEEL_LINE_HEIGHT_PX = 16;
 const WHEEL_PAUSE_THAT_RESETS_MS = 250;
 const SHORTEST_TIME_BETWEEN_WHEEL_STEPS_MS = 160;
-const SHORTEST_SWIPE_PX = 24;
-const SWIPE_DISTANCE_PER_STEP_PX = 50;
 
 /**
- * Move the photo selection instead of scrolling the page: the arrow keys move to the photo beside, above or below,
- * while the mouse wheel and vertical swipes step to the next or previous photo.
- * @param {{move: function(string): void, isViewerOpen: function(): boolean, stepViewer: function(number): void,
- *   swipeArea: HTMLElement}} controls Moves the selection up, down, to the next or previous photo; tells whether the
- *   photo viewer is open; steps the viewer; and names the element that reacts to swipes.
+ * Step the photo selection with the arrow keys and the mouse wheel instead of scrolling the page.
+ * @param {{move: function(string): void, isViewerOpen: function(): boolean, stepViewer: function(number): void}}
+ *   controls Selection mover, viewer state check and viewer stepper.
  */
-export function enableSelectionControls({ move, isViewerOpen, stepViewer, swipeArea }) {
+export function enableSelectionControls({ move, isViewerOpen, stepViewer }) {
   followArrowKeys(move, isViewerOpen);
   followWheel(move, isViewerOpen, stepViewer);
-  followSwipes(move, swipeArea);
 }
 
 function followArrowKeys(move, isViewerOpen) {
@@ -60,36 +55,5 @@ function followWheel(move, isViewerOpen, stepViewer) {
       }
     },
     { passive: false },
-  );
-}
-
-function followSwipes(move, swipeArea) {
-  let swipeStartY = null;
-  let ignoreNextClick = false;
-  swipeArea.addEventListener('pointerdown', (event) => {
-    ignoreNextClick = false;
-    swipeStartY = event.pointerType === 'mouse' ? null : event.clientY;
-  });
-  swipeArea.addEventListener('pointercancel', () => {
-    swipeStartY = null;
-  });
-  swipeArea.addEventListener('pointerup', (event) => {
-    if (swipeStartY === null) return;
-    const swipedUpBy = swipeStartY - event.clientY;
-    swipeStartY = null;
-    if (Math.abs(swipedUpBy) < SHORTEST_SWIPE_PX) return;
-    ignoreNextClick = true;
-    const steps = Math.max(1, Math.round(Math.abs(swipedUpBy) / SWIPE_DISTANCE_PER_STEP_PX));
-    for (let step = 0; step < steps; step += 1) move(swipedUpBy > 0 ? 'next' : 'previous');
-  });
-  swipeArea.addEventListener(
-    'click',
-    (event) => {
-      if (!ignoreNextClick) return;
-      ignoreNextClick = false;
-      event.stopPropagation();
-      event.preventDefault();
-    },
-    { capture: true },
   );
 }

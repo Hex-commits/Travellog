@@ -131,9 +131,9 @@ async function start() {
     areas,
   );
 
-  const selectPhoto = (photoId, { moveMap = true } = {}) => {
+  const selectPhoto = (photoId, { moveMap = true, moveAlbum = true } = {}) => {
     selectedPhotoId = photoId;
-    albumView.highlight(photoId, { scroll: true, focus: true });
+    albumView.highlight(photoId, { scroll: moveAlbum, focus: moveAlbum });
     if (moveMap) mapView.focusPhoto(photoId);
   };
 
@@ -143,6 +143,9 @@ async function start() {
   });
   albumView = createAlbumView(albumElement, {
     onOpenPhoto: (photoId) => lightbox.open(photoId),
+    onScrollToPhoto: (photoId) => {
+      if (photoId !== selectedPhotoId) selectPhoto(photoId, { moveAlbum: false });
+    },
   });
   const sectionsInOrder = {
     date: () => sectionsByDate(photos),
@@ -168,7 +171,6 @@ async function start() {
     },
     isViewerOpen: () => lightboxElement.open,
     stepViewer: (offset) => lightbox.step(offset),
-    swipeArea: albumElement,
   });
 }
 

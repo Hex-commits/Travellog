@@ -14,10 +14,11 @@ const FLY_SECONDS = 0.8;
 const MARKER_RADIUS = 6;
 const ACTIVE_MARKER_RADIUS = 10;
 const POPUP_WIDTH = 240;
-const FIT_PADDING_TOP_LEFT = [48, 48];
-const FIT_PADDING_BOTTOM_RIGHT_FOR_LABELS = [170, 48];
+const FIT_PADDING_PERCENT_TOP_LEFT = [15, 12];
+const FIT_PADDING_PERCENT_BOTTOM_RIGHT = [15, 6];
 
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+const canHover = window.matchMedia('(hover: hover)');
 
 /**
  * Show the photos as markers on a map with the areas they were taken in and the line leading to the marked photo.
@@ -25,8 +26,8 @@ const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
  * @param {object[]} photos Published photos in chronological order.
  * @param {object[]} areas Areas from areas.json.
  * @param {{onOpenPhoto: function(string): void, onSelectPhoto: function(string): void}} callbacks Reactions to the map.
- * @returns {{highlight: function(?string): void, focusPhoto: function(string): void}} Map controls: mark a photo, or
- *   move the map to a photo, mark it and open its preview.
+ * @returns {{highlight: function(?string): void, focusPhoto: function(string): void}} Controls to mark a photo or
+ *   move the map to it.
  */
 export function createMapView(container, photos, areas, { onOpenPhoto, onSelectPhoto }) {
   const map = L.map(container, { zoomSnap: 0.5 });
@@ -75,7 +76,7 @@ export function createMapView(container, photos, areas, { onOpenPhoto, onSelectP
       return;
     }
     highlight(photoId);
-    photoAwaitingPopup = photoId;
+    photoAwaitingPopup = canHover.matches ? photoId : null;
     const target = marker.getLatLng();
     if (reducedMotion.matches) {
       map.setView(target, Math.max(map.getZoom(), FOCUS_ZOOM), { animate: false });
@@ -95,12 +96,17 @@ function showEverything(map, points) {
   } else if (points.length === 1) {
     map.setView(points[0], SINGLE_PHOTO_ZOOM);
   } else {
+    const mapSize = map.getSize();
     map.fitBounds(points, {
-      paddingTopLeft: FIT_PADDING_TOP_LEFT,
-      paddingBottomRight: FIT_PADDING_BOTTOM_RIGHT_FOR_LABELS,
+      paddingTopLeft: percentOfSize(mapSize, FIT_PADDING_PERCENT_TOP_LEFT),
+      paddingBottomRight: percentOfSize(mapSize, FIT_PADDING_PERCENT_BOTTOM_RIGHT),
       maxZoom: FOCUS_ZOOM,
     });
   }
+}
+
+function percentOfSize(size, [horizontalPercent, verticalPercent]) {
+  return [(size.x * horizontalPercent) / 100, (size.y * verticalPercent) / 100];
 }
 
 function createMarker(photo, onOpenPhoto) {
