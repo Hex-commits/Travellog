@@ -6,9 +6,9 @@ const NO_LOCATION = 'no-location';
 
 /**
  * Split the photos into one album section per day.
- * @param {object[]} photos Published photos in chronological order.
+ * @param {object[]} photos Published photos, newest first.
  * @returns {{eyebrow: string, title: string, titleJa: ?string, photos: object[], caption: function(object): string}[]}
- *   Sections in chronological order.
+ *   Sections, newest day first.
  */
 export function sectionsByDate(photos) {
   return groupPhotosByDay(photos).map((group) => ({
@@ -21,8 +21,8 @@ export function sectionsByDate(photos) {
 }
 
 /**
- * Split the photos into one album section per area, in the order the areas were first visited.
- * @param {object[]} photos Published photos in chronological order.
+ * Split the photos into one album section per area, most recently visited area first.
+ * @param {object[]} photos Published photos, newest first.
  * @param {object[]} areas Areas from areas.json with the ids of their photos.
  * @returns {{eyebrow: string, title: string, titleJa: ?string, photos: object[], caption: function(object): string}[]}
  *   Sections for the areas, followed by photos outside every area and photos without a location.

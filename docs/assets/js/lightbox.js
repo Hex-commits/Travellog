@@ -6,7 +6,7 @@ const SWIPE_THRESHOLD_PX = 50;
 /**
  * Show photos one at a time in a full-screen viewer.
  * @param {HTMLDialogElement} dialog Viewer element with image, caption and step buttons.
- * @param {object[]} photos Published photos in chronological order.
+ * @param {object[]} photos Published photos in viewing order.
  * @param {{onShowPhoto: function(string): void, onClose: function(string): void}} callbacks Reactions to the viewer.
  * @returns {{open: function(string): void, step: function(number): void}} Viewer controls.
  */

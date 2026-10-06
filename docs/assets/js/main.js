@@ -7,7 +7,7 @@ import { createLightbox } from './lightbox.js';
 import { createMapView } from './map-view.js';
 import { createPhotoContext } from './photo-context.js';
 import { enableSelectionControls } from './selection-controls.js';
-import { summarizeTrip } from './trip-summary.js';
+import { newestFirst, summarizeTrip } from './trip-summary.js';
 
 const ALBUM_INDEX_URL = 'data/albums.json';
 const ALBUM_ADDRESS_PARAMETER = 'album';
@@ -113,6 +113,7 @@ async function start() {
     areas = await areasLoading;
   }
   const { photos } = manifest;
+  const photosNewestFirst = newestFirst(photos);
   renderSummary(summarizeTrip(photos), manifest.generatedAt);
 
   let lightbox = null;
@@ -148,14 +149,14 @@ async function start() {
     },
   });
   const sectionsInOrder = {
-    date: () => sectionsByDate(photos),
-    place: () => sectionsByPlace(photos, areas),
+    date: () => sectionsByDate(photosNewestFirst),
+    place: () => sectionsByPlace(photosNewestFirst, areas),
   };
   createAlbumTabs(document.getElementById('album-tabs'), (order) => {
     albumView.render(sectionsInOrder[order]());
     albumView.highlight(selectedPhotoId, { scroll: true, instant: true });
   });
-  lightbox = createLightbox(lightboxElement, photos, {
+  lightbox = createLightbox(lightboxElement, photosNewestFirst, {
     onShowPhoto: (photoId) => {
       selectedPhotoId = photoId;
       albumView.highlight(photoId);

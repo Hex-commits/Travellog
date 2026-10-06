@@ -19,9 +19,21 @@ export function dayKeyOf(takenAt) {
 }
 
 /**
- * Group photos by the day they were taken, numbering days from the start of the trip.
+ * Order photos from the newest to the oldest, with undated photos last.
  * @param {object[]} photos Published photos in chronological order.
- * @returns {{dayKey: ?string, dayNumber: ?number, photos: object[]}[]} Day groups, undated photos last.
+ * @returns {object[]} The photos, newest first.
+ */
+export function newestFirst(photos) {
+  const datedPhotos = photos.filter((photo) => dayKeyOf(photo.takenAt));
+  const undatedPhotos = photos.filter((photo) => !dayKeyOf(photo.takenAt));
+  return [...datedPhotos.reverse(), ...undatedPhotos];
+}
+
+/**
+ * Group photos by the day they were taken, numbering days from the start of the trip.
+ * @param {object[]} photos Published photos, sorted by time in either direction.
+ * @returns {{dayKey: ?string, dayNumber: ?number, photos: object[]}[]} Day groups in the order of the photos, undated
+ *   photos last.
  */
 export function groupPhotosByDay(photos) {
   const photosByDay = new Map();
@@ -30,8 +42,8 @@ export function groupPhotosByDay(photos) {
     if (!photosByDay.has(dayKey)) photosByDay.set(dayKey, []);
     photosByDay.get(dayKey).push(photo);
   }
-  const datedKeys = [...photosByDay.keys()].filter(Boolean).sort();
-  const firstDayKey = datedKeys[0];
+  const datedKeys = [...photosByDay.keys()].filter(Boolean);
+  const firstDayKey = [...datedKeys].sort()[0];
   const groups = datedKeys.map((dayKey) => ({
     dayKey,
     dayNumber: calendarDaysBetween(firstDayKey, dayKey) + 1,
