@@ -13,6 +13,7 @@ from site_builder.albums import (
     summarize_album,
     write_album_index,
 )
+from site_builder.archives import extract_new_archives
 from site_builder.area_map import write_area_map
 from site_builder.areas import group_into_areas
 from site_builder.district_lookup import DistrictLookup, DistrictLookupError
@@ -37,6 +38,7 @@ def main() -> int:
         cache_dir=arguments.cache_dir.resolve(),
         fallback_timezone=ZoneInfo(arguments.timezone),
     )
+    extract_new_archives(settings.raw_dir)
     logging.info("Scanning %s", settings.raw_dir)
     library_photos = scan(settings)
     if not library_photos:

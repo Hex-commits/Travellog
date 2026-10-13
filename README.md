@@ -13,7 +13,7 @@ python3 -m venv .venv
 .venv/bin/pip install -r requirements.txt
 ```
 
-Each folder inside `raw/` becomes an album with its own page; click the album name at the top of the site to switch albums. Publish all albums to `docs/`:
+Each folder inside `raw/` becomes an album with its own page; click the album name at the top of the site to switch albums. Downloaded `.zip` files can be dropped straight into `raw/`: the build first unpacks any photos they hold that are not in `raw/` yet. Publish all albums to `docs/`:
 
 ```sh
 .venv/bin/python -m site_builder
