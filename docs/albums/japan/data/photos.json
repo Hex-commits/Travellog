@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-13T11:21:33",
+  "generatedAt": "2026-10-18T07:41:56",
   "photos": [
     {
       "id": "5b6e22cf5184",
@@ -1212,16 +1212,6 @@
       "thumb": "photos/thumb/73fe43ff649d.jpg"
     },
     {
-      "id": "ff4d80e19872",
-      "takenAt": "2026-10-12T13:01:58",
-      "latitude": 34.26102,
-      "longitude": 133.07287,
-      "width": 2048,
-      "height": 1538,
-      "full": "photos/full/ff4d80e19872.jpg",
-      "thumb": "photos/thumb/ff4d80e19872.jpg"
-    },
-    {
       "id": "4edec605fb30",
       "takenAt": "2026-10-12T13:17:54",
       "latitude": 34.25427,
@@ -1280,6 +1270,126 @@
       "height": 2048,
       "full": "photos/full/80474780bbf9.jpg",
       "thumb": "photos/thumb/80474780bbf9.jpg"
+    },
+    {
+      "id": "128d3abcbf49",
+      "takenAt": "2026-10-14T15:33:49",
+      "latitude": 34.40932,
+      "longitude": 132.71244,
+      "width": 1536,
+      "height": 2048,
+      "full": "photos/full/128d3abcbf49.jpg",
+      "thumb": "photos/thumb/128d3abcbf49.jpg"
+    },
+    {
+      "id": "18073133b9d7",
+      "takenAt": "2026-10-14T19:22:33",
+      "latitude": 34.41064,
+      "longitude": 132.71689,
+      "width": 2048,
+      "height": 1538,
+      "full": "photos/full/18073133b9d7.jpg",
+      "thumb": "photos/thumb/18073133b9d7.jpg"
+    },
+    {
+      "id": "d2c3425adfc1",
+      "takenAt": "2026-10-15T15:46:35",
+      "latitude": 34.3949,
+      "longitude": 132.4751,
+      "width": 1536,
+      "height": 2048,
+      "full": "photos/full/d2c3425adfc1.jpg",
+      "thumb": "photos/thumb/d2c3425adfc1.jpg"
+    },
+    {
+      "id": "a488c1a79fe5",
+      "takenAt": "2026-10-15T16:13:09",
+      "latitude": 34.39279,
+      "longitude": 132.46936,
+      "width": 1536,
+      "height": 2048,
+      "full": "photos/full/a488c1a79fe5.jpg",
+      "thumb": "photos/thumb/a488c1a79fe5.jpg"
+    },
+    {
+      "id": "42f7e93e4bc4",
+      "takenAt": "2026-10-15T18:47:22",
+      "latitude": 34.39415,
+      "longitude": 132.46974,
+      "width": 1536,
+      "height": 2048,
+      "full": "photos/full/42f7e93e4bc4.jpg",
+      "thumb": "photos/thumb/42f7e93e4bc4.jpg"
+    },
+    {
+      "id": "b7f12de51581",
+      "takenAt": "2026-10-15T18:54:17",
+      "latitude": 34.39689,
+      "longitude": 132.47233,
+      "width": 2048,
+      "height": 1536,
+      "full": "photos/full/b7f12de51581.jpg",
+      "thumb": "photos/thumb/b7f12de51581.jpg"
+    },
+    {
+      "id": "61beab1f9812",
+      "takenAt": "2026-10-15T20:14:19",
+      "latitude": 34.42086,
+      "longitude": 132.71628,
+      "width": 1520,
+      "height": 2048,
+      "full": "photos/full/61beab1f9812.jpg",
+      "thumb": "photos/thumb/61beab1f9812.jpg"
+    },
+    {
+      "id": "5b22a23a7662",
+      "takenAt": "2026-10-15T20:14:32",
+      "latitude": 34.42087,
+      "longitude": 132.71628,
+      "width": 1536,
+      "height": 2048,
+      "full": "photos/full/5b22a23a7662.jpg",
+      "thumb": "photos/thumb/5b22a23a7662.jpg"
+    },
+    {
+      "id": "a36d25db3a04",
+      "takenAt": "2026-10-15T20:24:05",
+      "latitude": 34.41322,
+      "longitude": 132.71528,
+      "width": 1170,
+      "height": 2048,
+      "full": "photos/full/a36d25db3a04.jpg",
+      "thumb": "photos/thumb/a36d25db3a04.jpg"
+    },
+    {
+      "id": "e1e5e8eb1f46",
+      "takenAt": "2026-10-17T12:47:31",
+      "latitude": 34.42303,
+      "longitude": 132.73838,
+      "width": 1536,
+      "height": 2048,
+      "full": "photos/full/e1e5e8eb1f46.jpg",
+      "thumb": "photos/thumb/e1e5e8eb1f46.jpg"
+    },
+    {
+      "id": "ca2926083eed",
+      "takenAt": "2026-10-17T15:41:45",
+      "latitude": 34.41968,
+      "longitude": 132.73129,
+      "width": 1536,
+      "height": 2048,
+      "full": "photos/full/ca2926083eed.jpg",
+      "thumb": "photos/thumb/ca2926083eed.jpg"
+    },
+    {
+      "id": "f04ce444a4a6",
+      "takenAt": "2026-10-17T22:15:16",
+      "latitude": 34.39042,
+      "longitude": 132.46433,
+      "width": 1536,
+      "height": 2048,
+      "full": "photos/full/f04ce444a4a6.jpg",
+      "thumb": "photos/thumb/f04ce444a4a6.jpg"
     }
   ]
 }
