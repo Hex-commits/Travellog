@@ -719,6 +719,7 @@ button {
   grid-column: 2;
   grid-row: 1;
   align-self: stretch;
+  overflow: hidden;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   grid-template-rows: minmax(0, 1fr) auto;
@@ -736,7 +737,17 @@ button {
   box-shadow: var(--viewer-shadow);
   object-fit: contain;
   user-select: none;
-  touch-action: pan-y;
+  touch-action: none;
+  cursor: zoom-in;
+  transform-origin: center;
+}
+
+.lightbox-figure img.is-zoomed {
+  cursor: grab;
+}
+
+.lightbox-figure img.is-zoomed:active {
+  cursor: grabbing;
 }
 
 .lightbox-details {

@@ -1,5 +1,6 @@
 import { formatCoordinates, formatDateTime } from './formatting.js';
 import { hasLocation } from './trip-summary.js';
+import { enableZoom } from './photo-zoom.js';
 
 const SWIPE_THRESHOLD_PX = 50;
 
@@ -20,9 +21,11 @@ export function createLightbox(dialog, photos, { onShowPhoto, onClose }) {
   const nextButton = dialog.querySelector('[data-lightbox-step="1"]');
   let currentIndex = -1;
   let swipeStartX = null;
+  const zoom = enableZoom(image);
 
   function show(index) {
     currentIndex = index;
+    zoom.reset();
     const photo = photos[index];
     image.src = photo.full;
     image.width = photo.width;
@@ -61,6 +64,7 @@ export function createLightbox(dialog, photos, { onShowPhoto, onClose }) {
     }
   });
   dialog.addEventListener('keydown', (event) => {
+    if (zoom.isZoomed()) return;
     if (event.key === 'ArrowLeft') step(-1);
     if (event.key === 'ArrowRight') step(1);
   });
@@ -71,9 +75,11 @@ export function createLightbox(dialog, photos, { onShowPhoto, onClose }) {
     if (swipeStartX === null) return;
     const distance = event.clientX - swipeStartX;
     swipeStartX = null;
+    if (zoom.isZoomed() || zoom.wasGesture()) return;
     if (Math.abs(distance) >= SWIPE_THRESHOLD_PX) step(distance < 0 ? 1 : -1);
   });
   dialog.addEventListener('close', () => {
+    zoom.reset();
     if (currentIndex >= 0) onClose(photos[currentIndex].id);
   });
 
