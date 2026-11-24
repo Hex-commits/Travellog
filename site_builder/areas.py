@@ -8,8 +8,6 @@ from shapely.ops import unary_union
 from site_builder.district_lookup import City, District
 from site_builder.library import LibraryPhoto
 
-TOUCH_TOLERANCE_DEGREES = 0.002
-
 FindDistrict = Callable[[float, float], District | None]
 
 
@@ -32,7 +30,7 @@ class Area:
 
 
 def group_into_areas(photos: Iterable[LibraryPhoto], find_district: FindDistrict) -> list[Area]:
-    """Group located photos by district and merge districts that touch or belong to the same city.
+    """Group located photos by district and merge districts that belong to the same city.
 
     Args:
         photos: Photos in chronological order.
@@ -52,7 +50,7 @@ def group_into_areas(photos: Iterable[LibraryPhoto], find_district: FindDistrict
         districts.setdefault(district.id, district)
         photo_ids_by_district.setdefault(district.id, []).append(photo.id)
     shapes = {district_id: _shape_of(district) for district_id, district in districts.items()}
-    district_groups = _merge_districts(list(districts.values()), shapes)
+    district_groups = _group_by_city(list(districts.values()))
     return [_build_area(group, shapes, photo_ids_by_district) for group in district_groups]
 
 
@@ -61,25 +59,10 @@ def _shape_of(district: District) -> BaseGeometry:
     return MultiPolygon(polygons).buffer(0)
 
 
-def _merge_districts(districts: list[District], shapes: dict[str, BaseGeometry]) -> list[list[District]]:
-    group_of = list(range(len(districts)))
-
-    def find_group(index: int) -> int:
-        while group_of[index] != index:
-            group_of[index] = group_of[group_of[index]]
-            index = group_of[index]
-        return index
-
-    for first_index, first in enumerate(districts):
-        for second_index in range(first_index + 1, len(districts)):
-            second = districts[second_index]
-            same_city = first.city.id == second.city.id
-            touching = shapes[first.id].distance(shapes[second.id]) <= TOUCH_TOLERANCE_DEGREES
-            if same_city or touching:
-                group_of[find_group(second_index)] = find_group(first_index)
-    groups: dict[int, list[District]] = {}
-    for index, district in enumerate(districts):
-        groups.setdefault(find_group(index), []).append(district)
+def _group_by_city(districts: list[District]) -> list[list[District]]:
+    groups: dict[str, list[District]] = {}
+    for district in districts:
+        groups.setdefault(district.city.id, []).append(district)
     return list(groups.values())
 
 

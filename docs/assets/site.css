@@ -11,6 +11,9 @@
   --connection: rgb(44 74 148 / 0.7);
   --here: #e8672a;
   --here-glow: rgb(232 103 42 / 0.45);
+  --accent: #c9531a;
+  --accent-wash: #fbe9de;
+  --on-accent: #1a0e05;
   --area-fill: rgb(44 74 148 / 0.06);
   --area-outline: rgb(44 74 148 / 0.3);
   --shade: rgb(22 26 36 / 0.14);
@@ -37,22 +40,29 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --paper: #0e1118;
-    --surface: #161a24;
-    --ink: #e9ebf1;
-    --ink-soft: #b2b8c8;
-    --ink-faint: #868ea4;
-    --rule: #272d3c;
-    --indigo: #95abee;
-    --indigo-wash: #1c2540;
-    --marker-ring: #0e1118;
-    --connection: rgb(149 171 238 / 0.75);
+    --paper: #0a1122;
+    --surface: #111b32;
+    --ink: #e8ecf5;
+    --ink-soft: #aeb8d0;
+    --ink-faint: #7f8bab;
+    --rule: #22304f;
+    --indigo: #8fa9f2;
+    --indigo-wash: #1a2a52;
+    --marker-ring: #0a1122;
+    --connection: rgb(143 169 242 / 0.75);
     --here: #ff8f4a;
     --here-glow: rgb(255 143 74 / 0.45);
-    --area-fill: rgb(149 171 238 / 0.07);
-    --area-outline: rgb(149 171 238 / 0.32);
-    --shade: rgb(0 0 0 / 0.45);
-    --map-tile-filter: grayscale(1) invert(1) contrast(0.82) brightness(0.88);
+    --accent: #ff9a5c;
+    --accent-wash: rgb(255 143 74 / 0.14);
+    --on-accent: #1a0e05;
+    --area-fill: rgb(143 169 242 / 0.08);
+    --area-outline: rgb(143 169 242 / 0.34);
+    --shade: rgb(2 6 18 / 0.55);
+    --caption-ground: rgb(8 14 30 / 0.7);
+    --viewer-scrim: rgb(6 10 24 / 0.62);
+    --viewer-chip: rgb(10 17 34 / 0.78);
+    --viewer-chip-hover: rgb(26 42 82 / 0.92);
+    --map-tile-filter: grayscale(1) invert(1) contrast(0.82) brightness(0.86) sepia(0.4) hue-rotate(185deg) saturate(1.8);
     color-scheme: dark;
   }
 }
@@ -97,7 +107,7 @@ button {
 }
 
 :focus-visible {
-  outline: 2px solid var(--indigo);
+  outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
 
@@ -141,7 +151,7 @@ button {
   flex-wrap: wrap;
   gap: 14px;
   margin: 0;
-  color: var(--indigo);
+  color: var(--accent);
   font-family: var(--font-data);
   font-size: 12px;
   letter-spacing: 0.14em;
@@ -193,7 +203,7 @@ button {
 }
 
 .album-switcher-button:hover:not(:disabled) .album-switcher-chevron {
-  color: var(--indigo);
+  color: var(--accent);
 }
 
 .album-switcher-button[aria-expanded="true"] .album-switcher-chevron {
@@ -281,7 +291,7 @@ button {
 }
 
 .trip-stats dt {
-  color: var(--ink-faint);
+  color: var(--indigo);
   font-family: var(--font-data);
   font-size: 11px;
   letter-spacing: 0.12em;
@@ -353,12 +363,12 @@ button {
 }
 
 .album-tab:hover {
-  color: var(--ink);
+  color: var(--accent);
 }
 
 .album-tab[aria-selected="true"] {
-  background: var(--indigo);
-  color: var(--surface);
+  background: var(--here);
+  color: var(--on-accent);
 }
 
 .album {
@@ -419,7 +429,7 @@ button {
 
 .section-count {
   margin: 0;
-  color: var(--ink-faint);
+  color: var(--accent);
   font-family: var(--font-data);
   font-size: 12px;
   font-variant-numeric: tabular-nums;
@@ -453,6 +463,10 @@ button {
   height: 100%;
   object-fit: cover;
   transition: transform 0.4s ease;
+}
+
+.thumb:hover {
+  box-shadow: 0 0 0 2px var(--accent-wash);
 }
 
 .thumb:hover img {
@@ -830,7 +844,9 @@ button {
 }
 
 .lightbox-show-on-map:hover {
+  border-color: var(--here);
   background: var(--viewer-chip-hover);
+  color: var(--here);
 }
 
 .lightbox-step,
@@ -849,7 +865,9 @@ button {
 
 .lightbox-step:hover:not(:disabled),
 .lightbox-close:hover {
+  border-color: var(--here);
   background: var(--viewer-chip-hover);
+  color: var(--here);
 }
 
 .lightbox-step:disabled {
